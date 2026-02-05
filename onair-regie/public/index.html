@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Régie – ON-AIR</title>
+
+  <style>
+    :root{
+      --brand:#183156;
+      --bg:#0b1625;
+      --ring: rgba(255,255,255,.12);
+      --text:#eaf0fb;
+      --muted:#9fb2d4;
+
+      --white:#ffffff;
+      --red:#ff2d2d;
+      --blue:#64a9ff;
+      --neonGlow: rgba(255,45,45,.55);
+      --brandGlow: rgba(24,49,86,.35);
+
+      --shadow: 0 22px 52px rgba(0,0,0,.55);
+      --radius: 18px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 0%, rgba(24,49,86,.18), transparent 58%),
+        radial-gradient(900px 560px at 90% 10%, rgba(59,130,246,.08), transparent 56%),
+        linear-gradient(180deg, #0b1625, #0e1b2c);
+      overflow:hidden;
+      position:relative;
+    }
+
+    body.onair{
+      box-shadow: inset 0 0 0 12px rgba(255,45,45,.95), inset 0 0 80px rgba(255,45,45,.30), inset 0 0 160px rgba(255,45,45,.18);
+    }
+
+    body::before{
+      content:"";
+      position:fixed; inset:-12vh -12vw;
+      background:
+        radial-gradient(900px 520px at 12% 12%, rgba(24,49,86,.22), transparent 62%),
+        radial-gradient(900px 520px at 88% 8%, rgba(96,165,250,.12), transparent 64%);
+      filter: blur(6px);
+      opacity:.75;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .stage{
+      position:relative;
+      height:100vh;
+      width:100vw;
+      overflow:hidden;
+    }
+
+    .page{
+      position:absolute;
+      top:0;
+      left:50%;
+      width: 1500px;
+      margin:0;
+      padding: 22px 26px;
+      display:flex;
+      flex-direction:column;
+      gap: 18px;
+      position:relative;
+      z-index:1;
+
+      transform: translateX(-50%) scale(var(--scale, 1)) translate(var(--burnX, 0px), var(--burnY, 0px));
+      transform-origin: center top;
+      will-change: transform;
+      transition: transform 700ms ease;
+    }
+
+    .onairBar{
+      border-radius: 18px;
+      border: 1px solid rgba(24,49,86,.30);
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+      padding: 16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      position:relative;
+
+      background: linear-gradient(180deg, #ffffff, #f2f5f9);
+      color: rgba(0,0,0,.88);
+      letter-spacing: 6px;
+      font-weight: 950;
+      font-size: clamp(32px, 4.2vw, 64px);
+      text-transform: uppercase;
+      text-shadow: 0 2px 0 rgba(0,0,0,.06);
+    }
+
+    .onairBar::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      opacity:.10;
+      pointer-events:none;
+    }
+
+    .onairLeft{
+      position:absolute;
+      left: 16px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      z-index:1;
+    }
+
+    .topLogoWrap{
+      height: 34px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(24,49,86,.95);
+      border: 1px solid rgba(255,255,255,.14);
+      display:flex;
+      align-items:center;
+      box-shadow: 0 10px 18px rgba(0,0,0,.24);
+    }
+
+    .topLogo{
+      height: 20px;
+      width:auto;
+      display:block;
+    }
+
+    .onDot{
+      width: 16px; height: 16px;
+      border-radius: 4px;
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(24,49,86,.35), 0 8px 14px rgba(0,0,0,.20);
+    }
+
+    .onairTitle{
+      position:relative;
+      z-index:1;
+    }
+
+    body.onair .onairBar{
+      background: linear-gradient(180deg, var(--red), #b10000);
+      color: rgba(255,255,255,.98);
+      border-color: rgba(255,45,45,.45);
+      text-shadow: 0 2px 0 rgba(0,0,0,.35);
+      animation: glowPulse 1.8s ease-in-out infinite;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+
+    body.onair .onDot{
+      background:#ff2d2d;
+      box-shadow: 0 0 0 2px rgba(255,45,45,.45), 0 0 12px rgba(255,45,45,.55);
+    }
+
+    body.onair .topLogoWrap{
+      background: rgba(0,0,0,.28);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    @keyframes glowPulse{
+      0%,100%{ filter: brightness(1.00); }
+      50%{ filter: brightness(1.06); }
+    }
+
+    @keyframes neonBreath{
+      0%,100%{ transform: translateZ(0) scale(1); }
+      50%{ transform: translateZ(0) scale(1.01); }
+    }
+
+    .midRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(24,49,86,.28);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
+        linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.06));
+      box-shadow: var(--shadow);
+    }
+
+    body.onair .midRow{
+      border-color: rgba(255,45,45,.30);
+      box-shadow: var(--shadow), 0 0 24px rgba(255,45,45,.22);
+    }
+
+    .left, .right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 280px;
+    }
+
+    .right{ justify-content:flex-end; }
+
+    .logo{
+      width: 64px;
+      height: 64px;
+      object-fit:contain;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px;
+      filter: drop-shadow(0 14px 18px rgba(0,0,0,.35));
+      transition: filter .25s ease, border-color .25s ease;
+    }
+
+    body.onair .logo{
+      border-color: rgba(255,45,45,.30);
+      filter: drop-shadow(0 14px 18px rgba(0,0,0,.35)) drop-shadow(0 0 16px rgba(255,45,45,.24));
+    }
+
+    .brandText{
+      font-weight: 950;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: rgba(24,49,86,.65);
+    }
+
+    .showBox{
+      flex: 1 1 auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      text-align:center;
+    }
+
+    .showLabel{
+      font-size: 12px;
+      letter-spacing: .9px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .showName{
+      font-weight: 950;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      font-size: clamp(14px, 1.6vw, 22px);
+      color: rgba(238,243,255,.95);
+    }
+
+    .primaryPanel{
+      border-radius: var(--radius);
+      border: 1px solid rgba(24,49,86,.28);
+      background:
+        linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
+      box-shadow: var(--shadow);
+      padding: 22px 18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+    }
+
+    .primaryTime{
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-weight: 950;
+      letter-spacing: 1px;
+      font-size: clamp(64px, 7.5vw, 120px);
+      color: rgba(218,228,245,.98);
+      text-shadow: 0 2px 0 rgba(0,0,0,.18);
+    }
+
+    .primaryMeta{
+      font-family: var(--mono);
+      font-size: 13px;
+      color: rgba(163,183,210,.95);
+    }
+
+    /* Horloges */
+    .clocks{
+      border-radius: var(--radius);
+      border: 1px solid rgba(24,49,86,.28);
+      background:
+        radial-gradient(1000px 260px at 50% 0%, rgba(255,255,255,.06), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
+        linear-gradient(180deg, rgba(24,49,86,.16), rgba(24,49,86,.08)),
+        #0a0f1b;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    body.onair .clocks{
+      border-color: rgba(255,45,45,.28);
+      box-shadow: var(--shadow), 0 0 22px rgba(255,45,45,.18);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .clockCard{
+      position:relative;
+      border-radius: 18px;
+      border: 1px solid rgba(24,49,86,.32);
+      background:
+        linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
+      padding: 18px 18px 16px;
+      overflow:hidden;
+    }
+
+    .clockCard::before{
+      content:"";
+      position:absolute; inset:-45% -30%;
+      background: radial-gradient(circle at 35% 30%, rgba(96,165,250,.12), transparent 58%);
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    .city{
+      position:relative;
+      font-weight: 950;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      font-size: 13px;
+      color: rgba(218,228,245,.92);
+      margin-bottom: 12px;
+    }
+
+    .time{
+      position:relative;
+      font-family: var(--mono);
+      font-weight: 950;
+      letter-spacing: 1.8px;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(42px, 3.2vw, 56px);
+      padding: 22px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(24,49,86,.36);
+      background:
+        radial-gradient(900px 120px at 50% 0%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+        linear-gradient(180deg, rgba(24,49,86,.16), rgba(24,49,86,.08));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 18px 34px rgba(0,0,0,.40);
+      text-shadow: 0 0 18px rgba(255,255,255,.12);
+    }
+
+    body.onair .time{
+      border-color: rgba(255,45,45,.28);
+      text-shadow:
+        0 0 10px rgba(255,45,45,.35),
+        0 0 24px rgba(255,45,45,.25),
+        0 0 2px rgba(255,255,255,.25);
+    }
+
+    .meta{
+      position:relative;
+      margin-top: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(163,183,210,.95);
+    }
+
+    /* Footer */
+    .footer{
+      margin-top:auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--ring);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      padding: 12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .fullTime{
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 14px;
+      color: rgba(218,228,245,.96);
+    }
+
+    .api{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    .lamp{
+      width:9px; height:9px; border-radius:50%;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.10), 0 0 16px rgba(255,255,255,.10);
+    }
+    .lamp.ok{background:#22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,.35), 0 0 16px rgba(34,197,94,.35)}
+    .lamp.bad{background:#ef4444; box-shadow: 0 0 0 1px rgba(239,68,68,.35), 0 0 16px rgba(239,68,68,.35)}
+
+    @media (max-width: 1280px){
+      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .left, .right{ min-width: 220px; }
+    }
+    @media (max-width: 680px){
+      .grid{ grid-template-columns: 1fr; }
+      body.onair{ box-shadow: inset 0 0 0 7px rgba(255,45,45,.95); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+    <div class="page" id="page">
+    <div class="onairBar" id="onairBar">
+      <div class="onairLeft">
+        <span class="onDot"></span>
+        <span class="topLogoWrap">
+          <img class="topLogo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
+        </span>
+      </div>
+      <span class="onairTitle">ON-AIR</span>
+    </div>
+
+    <div class="midRow">
+      <div class="left">
+        <img class="logo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
+        <div class="brandText">BSRQ</div>
+      </div>
+
+      <div class="showBox">
+        <div class="showLabel">Émission</div>
+        <div class="showName" id="showName">Lancement – Régie</div>
+      </div>
+
+      <div class="right">
+        <div class="brandText" id="clientLabel">Client</div>
+        <img class="logo" src="logo-client.png" alt="Logo client" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <section class="primaryPanel">
+      <div class="primaryTime" id="primaryTime">--:--:--</div>
+      <div class="primaryMeta">Europe/Paris</div>
+    </section>
+
+    <section class="clocks">
+      <div class="grid">
+        <div class="clockCard" data-tz="America/Cayenne">
+          <div class="city">Kourou</div>
+          <div class="time" data-time>--:--:--</div>
+          <div class="meta">
+            <span>America/Cayenne</span>
+            <span data-date>--/--/----</span>
+          </div>
+        </div>
+
+        <div class="clockCard" data-tz="America/New_York">
+          <div class="city">Cap Canaveral</div>
+          <div class="time" data-time>--:--:--</div>
+          <div class="meta">
+            <span>America/New_York</span>
+            <span data-date>--/--/----</span>
+          </div>
+        </div>
+
+        <div class="clockCard" data-tz="UTC">
+          <div class="city">UTC</div>
+          <div class="time" data-time>--:--:--</div>
+          <div class="meta">
+            <span>UTC</span>
+            <span data-date>--/--/----</span>
+          </div>
+        </div>
+
+        <div class="clockCard" data-tz="Europe/Paris">
+          <div class="city">Paris</div>
+          <div class="time" data-time>--:--:--</div>
+          <div class="meta">
+            <span>Europe/Paris</span>
+            <span data-date>--/--/----</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <div class="fullTime" id="fullTime">Heure complète (Paris) : …</div>
+      <div class="api" title="Micro-API locale">
+        <span class="lamp" id="apiLamp"></span>
+        <span id="apiText">API: …</span>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    // V1 hardcodée (modifs à la main si besoin)
+    const SHOW_NAME = "Lancement – Régie";
+    const CLIENT_LABEL = "Client";
+
+    // état ON-AIR (écrit par l'API)
+    const STATE_URL = "/onair.json";
+    const POLL_MS = 500;
+
+    // anti burn-in léger
+    const BURN_EVERY_MS = 30000;
+    const BURN_MAX_PX = 6;
+
+    const $ = (id) => document.getElementById(id);
+    const page = $("page");
+    const apiLamp = $("apiLamp");
+    const apiText = $("apiText");
+    const fullTimeEl = $("fullTime");
+    const primaryTimeEl = $("primaryTime");
+
+    $("showName").textContent = SHOW_NAME;
+    $("clientLabel").textContent = CLIENT_LABEL;
+
+    function setOnair(isOn){
+      document.body.classList.toggle("onair", !!isOn);
+    }
+
+    function formatTime(tz){
+      return new Intl.DateTimeFormat("fr-FR", {
+        timeZone: tz, hour12: false,
+        hour:"2-digit", minute:"2-digit", second:"2-digit"
+      }).format(new Date());
+    }
+
+    function formatDate(tz){
+      return new Intl.DateTimeFormat("fr-FR", {
+        timeZone: tz,
+        year:"numeric", month:"2-digit", day:"2-digit"
+      }).format(new Date());
+    }
+
+    function updateClocks(){
+      document.querySelectorAll("[data-tz]").forEach(card => {
+        const tz = card.getAttribute("data-tz");
+        card.querySelector("[data-time]").textContent = formatTime(tz);
+        card.querySelector("[data-date]").textContent = formatDate(tz);
+      });
+
+      const parisFull = new Intl.DateTimeFormat("fr-FR", {
+        timeZone:"Europe/Paris",
+        weekday:"long", year:"numeric", month:"long", day:"2-digit",
+        hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false
+      }).format(new Date());
+
+      fullTimeEl.textContent = `Heure complète (Paris) : ${parisFull}`;
+      primaryTimeEl.textContent = formatTime("Europe/Paris");
+    }
+
+    async function pollState(){
+      try{
+        const res = await fetch(STATE_URL, { cache:"no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        setOnair(!!data.onair);
+
+        apiLamp.className = "lamp ok";
+        apiText.textContent = "API: OK";
+      } catch {
+        setOnair(false);
+        apiLamp.className = "lamp bad";
+        apiText.textContent = "API: KO";
+      }
+    }
+
+    function applyBurnIn(){
+      const x = Math.round((Math.random()*2 - 1) * BURN_MAX_PX);
+      const y = Math.round((Math.random()*2 - 1) * BURN_MAX_PX);
+      page.style.setProperty("--burnX", `${x}px`);
+      page.style.setProperty("--burnY", `${y}px`);
+    }
+
+    function fitToScreen(){
+      page.style.setProperty("--scale", 1);
+      const w = page.offsetWidth;
+      const h = page.offsetHeight;
+      const scale = Math.min(window.innerWidth / w, window.innerHeight / h, 1);
+      page.style.setProperty("--scale", scale.toFixed(3));
+    }
+
+    updateClocks();
+    setInterval(updateClocks, 250);
+
+    pollState();
+    setInterval(pollState, POLL_MS);
+
+    applyBurnIn();
+    setInterval(applyBurnIn, BURN_EVERY_MS);
+
+    fitToScreen();
+    window.addEventListener("resize", fitToScreen);
+  </script>
+</body>
+</html>
