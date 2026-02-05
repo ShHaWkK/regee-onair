@@ -1,0 +1,11 @@
+services:
+  onair:
+    build: .
+    container_name: onair-regie
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    volumes:
+      - ./public/onair.json:/app/public/onair.json
+      - ./public/logo-bsrq.png:/app/public/logo-bsrq.png
+      - ./public/logo-client.png:/app/public/logo-client.png

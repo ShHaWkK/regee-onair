@@ -1,0 +1,8 @@
+{
+  "name": "onair-regie",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
