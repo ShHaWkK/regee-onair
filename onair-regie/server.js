@@ -25,6 +25,8 @@ function writeState(onair) {
 
   const tmp = STATE_FILE + ".tmp";
   fs.writeFileSync(tmp, payload, "utf-8");
+  // Sur Windows, rename vers un fichier existant peut échouer → on supprime la cible d'abord
+  if (fs.existsSync(STATE_FILE)) fs.unlinkSync(STATE_FILE);
   fs.renameSync(tmp, STATE_FILE);
 }
 
@@ -36,7 +38,8 @@ app.get("/onair/on", (req, res) => {
   try {
     writeState(true);
     res.type("text/plain").send("OK ON-AIR=ON\n");
-  } catch {
+  } catch (err) {
+    console.error("Erreur /onair/on:", err);
     res.status(500).type("text/plain").send("ERROR\n");
   }
 });
@@ -45,7 +48,8 @@ app.get("/onair/off", (req, res) => {
   try {
     writeState(false);
     res.type("text/plain").send("OK ON-AIR=OFF\n");
-  } catch {
+  } catch (err) {
+    console.error("Erreur /onair/off:", err);
     res.status(500).type("text/plain").send("ERROR\n");
   }
 });

@@ -6,6 +6,5 @@ services:
       - "8081:8081"
     restart: unless-stopped
     volumes:
-      - ./public/onair.json:/app/public/onair.json
-      - ./public/logo-bsrq.png:/app/public/logo-bsrq.png
-      - ./public/logo-client.png:/app/public/logo-client.png
+      # Montage du dossier entier pour que le serveur puisse écrire onair.json
+      - ./public:/app/public
