@@ -67,7 +67,7 @@
       position:absolute;
       top:0;
       left:50%;
-      width: 1500px;
+      width: 1990px;
       margin:0;
       padding: 22px 26px;
       display:flex;
@@ -76,7 +76,7 @@
       position:relative;
       z-index:1;
 
-      transform: translateX(-50%) scale(var(--scale, 1)) translate(var(--burnX, 0px), var(--burnY, 0px));
+      transform: translateX(-50%) scale(var(--scale, 1));
       transform-origin: center top;
       will-change: transform;
       transition: transform 700ms ease;
@@ -119,10 +119,18 @@
       gap: 10px;
       z-index:1;
     }
+    .onairRight{
+      position:absolute;
+      right: 16px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      z-index:1;
+    }
 
     .topLogoWrap{
-      height: 34px;
-      padding: 6px 10px;
+      height: 44px;
+      padding: 8px 12px;
       border-radius: 999px;
       background: rgba(24,49,86,.95);
       border: 1px solid rgba(255,255,255,.14);
@@ -132,7 +140,7 @@
     }
 
     .topLogo{
-      height: 20px;
+      height: 28px;
       width:auto;
       display:block;
     }
@@ -179,9 +187,9 @@
     }
 
     .midRow{
-      display:flex;
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items:center;
-      justify-content:space-between;
       gap:16px;
 
       padding: 14px 16px;
@@ -202,10 +210,8 @@
       display:flex;
       align-items:center;
       gap:12px;
-      min-width: 280px;
     }
-
-    .right{ justify-content:flex-end; }
+    .right{ justify-self:end; }
 
     .logo{
       width: 64px;
@@ -233,11 +239,11 @@
     }
 
     .showBox{
-      flex: 1 1 auto;
+      grid-column: 2;
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:6px;
+      gap:10px;
       text-align:center;
     }
 
@@ -248,14 +254,30 @@
       color: var(--muted);
     }
 
+    .titleRow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
     .showName{
       font-weight: 950;
-      letter-spacing: .6px;
+      letter-spacing: .8px;
       text-transform: uppercase;
-      font-size: clamp(14px, 1.6vw, 22px);
+      font-size: clamp(18px, 2.0vw, 26px);
       color: rgba(238,243,255,.95);
     }
 
+    .locationPill{
+      font-size: 12px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: rgba(218,228,245,.92);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(24,49,86,.32);
+      background: linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
+    }
     .primaryPanel{
       border-radius: var(--radius);
       border: 1px solid rgba(24,49,86,.28);
@@ -330,9 +352,9 @@
     .city{
       position:relative;
       font-weight: 950;
-      letter-spacing: 1.1px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      font-size: 13px;
+      font-size: 16px;
       color: rgba(218,228,245,.92);
       margin-bottom: 12px;
     }
@@ -373,7 +395,7 @@
       align-items:center;
       gap:10px;
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: 14px;
       color: rgba(163,183,210,.95);
     }
 
@@ -437,18 +459,22 @@
           <img class="topLogo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
         </span>
       </div>
+      <div class="onairRight">
+        <span class="topLogoWrap">
+          <img class="topLogo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
+        </span>
+      </div>
       <span class="onairTitle">ON-AIR</span>
     </div>
 
     <div class="midRow">
-      <div class="left">
-        <img class="logo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
-        <div class="brandText">BSRQ</div>
-      </div>
+      <!-- Left brand removed as requested -->
 
       <div class="showBox">
         <div class="showLabel">Émission</div>
-        <div class="showName" id="showName">Lancement – Régie</div>
+        <div class="titleRow">
+          <div class="showName" id="showName">ESA - CREW12</div>
+        </div>
       </div>
 
       <div class="right">
@@ -474,7 +500,7 @@
         </div>
 
         <div class="clockCard" data-tz="America/New_York">
-          <div class="city">Cap Canaveral</div>
+          <div class="city">Cape Canaveral (ET)</div>
           <div class="time" data-time>--:--:--</div>
           <div class="meta">
             <span>America/New_York</span>
@@ -514,16 +540,14 @@
 
   <script>
     // V1 hardcodée (modifs à la main si besoin)
-    const SHOW_NAME = "Lancement – Régie";
+    const SHOW_NAME = "ESA - CREW12";
     const CLIENT_LABEL = "Client";
 
     // état ON-AIR (écrit par l'API)
     const STATE_URL = "/onair.json";
     const POLL_MS = 500;
 
-    // anti burn-in léger
-    const BURN_EVERY_MS = 30000;
-    const BURN_MAX_PX = 6;
+    // anti burn-in désactivé
 
     const $ = (id) => document.getElementById(id);
     const page = $("page");
@@ -587,13 +611,6 @@
       }
     }
 
-    function applyBurnIn(){
-      const x = Math.round((Math.random()*2 - 1) * BURN_MAX_PX);
-      const y = Math.round((Math.random()*2 - 1) * BURN_MAX_PX);
-      page.style.setProperty("--burnX", `${x}px`);
-      page.style.setProperty("--burnY", `${y}px`);
-    }
-
     function fitToScreen(){
       page.style.setProperty("--scale", 1);
       const w = page.offsetWidth;
@@ -607,9 +624,6 @@
 
     pollState();
     setInterval(pollState, POLL_MS);
-
-    applyBurnIn();
-    setInterval(applyBurnIn, BURN_EVERY_MS);
 
     fitToScreen();
     window.addEventListener("resize", fitToScreen);
