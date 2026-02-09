@@ -67,7 +67,7 @@
       position:absolute;
       top:0;
       left:50%;
-      width: 1990px;
+      width: 1920px;
       margin:0;
       padding: 22px 26px;
       display:flex;
@@ -615,7 +615,7 @@
       page.style.setProperty("--scale", 1);
       const w = page.offsetWidth;
       const h = page.offsetHeight;
-      const scale = Math.min(window.innerWidth / w, window.innerHeight / h, 1);
+      const scale = Math.min(window.innerWidth / w, window.innerHeight / h);
       page.style.setProperty("--scale", scale.toFixed(3));
     }
 
