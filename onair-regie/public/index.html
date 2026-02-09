@@ -327,8 +327,9 @@
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(4, auto);
+      justify-content: center;
+      gap: 22px;
     }
 
     .clockCard{
@@ -339,6 +340,7 @@
         linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
       padding: 18px 18px 16px;
       overflow:hidden;
+      width: 420px;
     }
 
     .clockCard::before{
@@ -352,11 +354,12 @@
     .city{
       position:relative;
       font-weight: 950;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.4px;
       text-transform: uppercase;
-      font-size: 16px;
+      font-size: clamp(22px, 2.4vw, 30px);
       color: rgba(218,228,245,.92);
       margin-bottom: 12px;
+      text-align:center;
     }
 
     .time{
@@ -377,6 +380,7 @@
         inset 0 1px 0 rgba(255,255,255,.10),
         0 18px 34px rgba(0,0,0,.40);
       text-shadow: 0 0 18px rgba(255,255,255,.12);
+      text-align:center;
     }
 
     body.onair .time{
@@ -391,9 +395,9 @@
       position:relative;
       margin-top: 12px;
       display:flex;
-      justify-content:space-between;
+      justify-content:center;
       align-items:center;
-      gap:10px;
+      gap:12px;
       font-family: var(--mono);
       font-size: 14px;
       color: rgba(163,183,210,.95);
@@ -439,11 +443,11 @@
     .lamp.bad{background:#ef4444; box-shadow: 0 0 0 1px rgba(239,68,68,.35), 0 0 16px rgba(239,68,68,.35)}
 
     @media (max-width: 1280px){
-      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid{ grid-template-columns: repeat(2, auto); justify-content:center; }
       .left, .right{ min-width: 220px; }
     }
     @media (max-width: 680px){
-      .grid{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns: auto; justify-content:center; }
       body.onair{ box-shadow: inset 0 0 0 7px rgba(255,45,45,.95); }
     }
   </style>
