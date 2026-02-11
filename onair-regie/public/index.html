@@ -24,6 +24,7 @@
 
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --cover-bias: .22;
     }
 
     *{box-sizing:border-box}
@@ -66,18 +67,18 @@
     .page{
       position:absolute;
       top:0;
-      left:50%;
-      width: 1920px;
+      left:0;
+      width: var(--base-w, 1920px);
       margin:0;
       padding: 22px 26px;
       display:flex;
       flex-direction:column;
-      gap: 18px;
+      gap: 58px;
       position:relative;
       z-index:1;
 
-      transform: translateX(-50%) scale(var(--scale, 1));
-      transform-origin: center top;
+      transform: scale(var(--scale, 1));
+      transform-origin: top left;
       will-change: transform;
       transition: transform 700ms ease;
     }
@@ -296,7 +297,7 @@
       font-variant-numeric: tabular-nums;
       font-weight: 950;
       letter-spacing: 1px;
-      font-size: clamp(64px, 7.5vw, 120px);
+      font-size: clamp(84px, 9vw, 160px);
       color: rgba(218,228,245,.98);
       text-shadow: 0 2px 0 rgba(0,0,0,.18);
     }
@@ -310,14 +311,14 @@
     /* Horloges */
     .clocks{
       border-radius: var(--radius);
-      border: 1px solid rgba(24,49,86,.28);
+      border: 1px solid rgba(255,255,255,.18);
       background:
         radial-gradient(1000px 260px at 50% 0%, rgba(255,255,255,.06), transparent 62%),
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
         linear-gradient(180deg, rgba(24,49,86,.16), rgba(24,49,86,.08)),
         #0a0f1b;
       box-shadow: var(--shadow);
-      padding: 18px;
+      padding: 22px;
     }
 
     body.onair .clocks{
@@ -327,9 +328,8 @@
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(4, auto);
-      justify-content: center;
-      gap: 22px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 26px;
     }
 
     .clockCard{
@@ -340,7 +340,7 @@
         linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
       padding: 18px 18px 16px;
       overflow:hidden;
-      width: 420px;
+      width: 100%;
     }
 
     .clockCard::before{
@@ -356,7 +356,12 @@
       font-weight: 950;
       letter-spacing: 1.4px;
       text-transform: uppercase;
-      font-size: clamp(22px, 2.4vw, 30px);
+      font-size: clamp(28px, 3.2vw, 38px);
+      line-height: 1.2;
+      min-height: 2.6em;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       color: rgba(218,228,245,.92);
       margin-bottom: 12px;
       text-align:center;
@@ -368,7 +373,7 @@
       font-weight: 950;
       letter-spacing: 1.8px;
       font-variant-numeric: tabular-nums;
-      font-size: clamp(42px, 3.2vw, 56px);
+      font-size: clamp(66px, 4.8vw, 88px);
       padding: 22px 18px;
       border-radius: 16px;
       border: 1px solid rgba(24,49,86,.36);
@@ -504,7 +509,7 @@
         </div>
 
         <div class="clockCard" data-tz="America/New_York">
-          <div class="city">Cape Canaveral (ET)</div>
+          <div class="city">Cape Canaveral</div>
           <div class="time" data-time>--:--:--</div>
           <div class="meta">
             <span>America/New_York</span>
@@ -617,10 +622,14 @@
 
     function fitToScreen(){
       page.style.setProperty("--scale", 1);
-      const w = page.offsetWidth;
-      const h = page.offsetHeight;
-      const scale = Math.min(window.innerWidth / w, window.innerHeight / h);
-      page.style.setProperty("--scale", scale.toFixed(3));
+      page.style.setProperty("--base-w", "1920px");
+      const h0 = page.offsetHeight;
+      const s0 = window.innerHeight / h0;
+      const baseW = Math.round(window.innerWidth / s0);
+      page.style.setProperty("--base-w", baseW + "px");
+      const h1 = page.offsetHeight;
+      const s1 = window.innerHeight / h1;
+      page.style.setProperty("--scale", s1.toFixed(3));
     }
 
     updateClocks();
