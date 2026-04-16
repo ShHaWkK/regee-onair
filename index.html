@@ -24,7 +24,6 @@
 
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      --cover-bias: .22;
     }
 
     *{box-sizing:border-box}
@@ -67,8 +66,8 @@
     .page{
       position:absolute;
       top:0;
-      left:0;
-      width: var(--base-w, 1920px);
+      left:50%;
+      width: 1920px;
       margin:0;
       padding: 22px 26px;
       display:flex;
@@ -77,8 +76,8 @@
       position:relative;
       z-index:1;
 
-      transform: scale(var(--scale, 1));
-      transform-origin: top left;
+      transform: translateX(-50%) scale(var(--scale, 1));
+      transform-origin: center top;
       will-change: transform;
       transition: transform 700ms ease;
     }
@@ -98,7 +97,7 @@
       color: rgba(0,0,0,.88);
       letter-spacing: 6px;
       font-weight: 950;
-      font-size: clamp(64px, 8vw, 120px);
+      font-size: clamp(32px, 4.2vw, 64px);
       text-transform: uppercase;
       text-shadow: 0 2px 0 rgba(0,0,0,.06);
     }
@@ -130,8 +129,8 @@
     }
 
     .topLogoWrap{
-      height: 72px;
-      padding: 10px 18px;
+      height: 44px;
+      padding: 8px 12px;
       border-radius: 999px;
       background: rgba(24,49,86,.95);
       border: 1px solid rgba(255,255,255,.14);
@@ -141,13 +140,12 @@
     }
 
     .topLogo{
-      height: 52px;
+      height: 28px;
       width:auto;
       display:block;
     }
 
     .onDot{
-      display: none;
       width: 16px; height: 16px;
       border-radius: 4px;
       background: #ffffff;
@@ -266,7 +264,7 @@
       font-weight: 950;
       letter-spacing: .8px;
       text-transform: uppercase;
-      font-size: clamp(48px, 5vw, 80px);
+      font-size: clamp(18px, 2.0vw, 26px);
       color: rgba(238,243,255,.95);
     }
 
@@ -293,33 +291,12 @@
       gap:8px;
     }
 
-    .panelDivider{
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
-      margin: 12px 0;
-    }
-
-    .onairTimer{
-      font-family: var(--mono);
-      font-variant-numeric: tabular-nums;
-      font-weight: 950;
-      letter-spacing: 1px;
-      font-size: clamp(64px, 8vw, 140px);
-      color: rgba(218,228,245,.98);
-      text-shadow: 0 2px 0 rgba(0,0,0,.18);
-    }
-    body.onair .onairTimer{
-      color: var(--red);
-      text-shadow: 0 0 10px rgba(255,45,45,.35), 0 0 24px rgba(255,45,45,.25);
-    }
-
     .primaryTime{
       font-family: var(--mono);
       font-variant-numeric: tabular-nums;
       font-weight: 950;
       letter-spacing: 1px;
-      font-size: clamp(148px, 9vw, 160px);
+      font-size: clamp(64px, 7.5vw, 120px);
       color: rgba(218,228,245,.98);
       text-shadow: 0 2px 0 rgba(0,0,0,.18);
     }
@@ -333,14 +310,14 @@
     /* Horloges */
     .clocks{
       border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(24,49,86,.28);
       background:
         radial-gradient(1000px 260px at 50% 0%, rgba(255,255,255,.06), transparent 62%),
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
         linear-gradient(180deg, rgba(24,49,86,.16), rgba(24,49,86,.08)),
         #0a0f1b;
       box-shadow: var(--shadow);
-      padding: 22px;
+      padding: 18px;
     }
 
     body.onair .clocks{
@@ -350,8 +327,9 @@
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 26px;
+      grid-template-columns: repeat(4, auto);
+      justify-content: center;
+      gap: 22px;
     }
 
     .clockCard{
@@ -362,7 +340,7 @@
         linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
       padding: 18px 18px 16px;
       overflow:hidden;
-      width: 100%;
+      width: 420px;
     }
 
     .clockCard::before{
@@ -378,12 +356,7 @@
       font-weight: 950;
       letter-spacing: 1.4px;
       text-transform: uppercase;
-      font-size: clamp(36px, 4.5vw, 56px);
-      line-height: 1.2;
-      min-height: 2.6em;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      font-size: clamp(22px, 2.4vw, 30px);
       color: rgba(218,228,245,.92);
       margin-bottom: 12px;
       text-align:center;
@@ -395,7 +368,7 @@
       font-weight: 950;
       letter-spacing: 1.8px;
       font-variant-numeric: tabular-nums;
-      font-size: clamp(80px, 6.5vw, 120px);
+      font-size: clamp(42px, 3.2vw, 56px);
       padding: 22px 18px;
       border-radius: 16px;
       border: 1px solid rgba(24,49,86,.36);
@@ -426,7 +399,7 @@
       align-items:center;
       gap:12px;
       font-family: var(--mono);
-      font-size: 18px;
+      font-size: 14px;
       color: rgba(163,183,210,.95);
     }
 
@@ -470,7 +443,7 @@
     .lamp.bad{background:#ef4444; box-shadow: 0 0 0 1px rgba(239,68,68,.35), 0 0 16px rgba(239,68,68,.35)}
 
     @media (max-width: 1280px){
-      /* .grid rule removed to maintain 3 columns */
+      .grid{ grid-template-columns: repeat(2, auto); justify-content:center; }
       .left, .right{ min-width: 220px; }
     }
     @media (max-width: 680px){
@@ -487,12 +460,12 @@
       <div class="onairLeft">
         <span class="onDot"></span>
         <span class="topLogoWrap">
-          <img class="topLogo" src="./logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
+          <img class="topLogo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
         </span>
       </div>
       <div class="onairRight">
         <span class="topLogoWrap">
-          <img class="topLogo" src="./logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
+          <img class="topLogo" src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
         </span>
       </div>
       <span class="onairTitle">ON-AIR</span>
@@ -502,6 +475,7 @@
       <!-- Left brand removed as requested -->
 
       <div class="showBox">
+        <div class="showLabel">Émission</div>
         <div class="titleRow">
           <div class="showName" id="showName">ESA - CREW12</div>
         </div>
@@ -509,13 +483,11 @@
 
       <div class="right">
         <div class="brandText" id="clientLabel">Client</div>
-        <img class="logo" src="./logo-client.png" alt="Logo client" onerror="if(this.dataset.fallback!=='1'){this.dataset.fallback='1';this.src='./logo-bsrq.png';}else{this.style.display='none';}">
+        <img class="logo" src="logo-client.png" alt="Logo client" onerror="this.style.display='none'">
       </div>
     </div>
 
     <section class="primaryPanel">
-      <div class="onairTimer" id="onairTimer">00:00:00</div>
-      <div class="panelDivider"></div>
       <div class="primaryTime" id="primaryTime">--:--:--</div>
       <div class="primaryMeta">Europe/Paris</div>
     </section>
@@ -532,7 +504,7 @@
         </div>
 
         <div class="clockCard" data-tz="America/New_York">
-          <div class="city">Cape Canaveral</div>
+          <div class="city">Cape Canaveral (ET)</div>
           <div class="time" data-time>--:--:--</div>
           <div class="meta">
             <span>America/New_York</span>
@@ -545,6 +517,15 @@
           <div class="time" data-time>--:--:--</div>
           <div class="meta">
             <span>UTC</span>
+            <span data-date>--/--/----</span>
+          </div>
+        </div>
+
+        <div class="clockCard" data-tz="Europe/Paris">
+          <div class="city">Paris</div>
+          <div class="time" data-time>--:--:--</div>
+          <div class="meta">
+            <span>Europe/Paris</span>
             <span data-date>--/--/----</span>
           </div>
         </div>
@@ -572,10 +553,7 @@
     const apiText       = $("apiText");
     const fullTimeEl    = $("fullTime");
     const primaryTimeEl = $("primaryTime");
-    const onairTimerEl  = $("onairTimer");
     const clockCards    = Array.from(document.querySelectorAll("[data-tz]"));
-
-    let onairStartedAtMs = null;
 
     $("showName").textContent    = SHOW_NAME;
     $("clientLabel").textContent = CLIENT_LABEL;
@@ -584,7 +562,7 @@
       document.body.classList.toggle("onair", !!isOn);
     }
 
-    //  Formatters cachés 
+    //  Formatters cachés (évite les re-créations coûteuses chaque seconde) 
     const timeFormatters = {};
     const dateFormatters = {};
     let parisFullFormatter = null;
@@ -624,15 +602,7 @@
       primaryTimeEl.textContent = getFormatter("Europe/Paris","time").format(now);
     }
 
-    function updateTimer(){
-      const elapsed = onairStartedAtMs ? Math.max(0, Date.now() - onairStartedAtMs) : 0;
-      const h = Math.floor(elapsed / 3600000);
-      const m = Math.floor((elapsed % 3600000) / 60000);
-      const s = Math.floor((elapsed % 60000) / 1000);
-      onairTimerEl.textContent = `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-    }
-
-    // ── Polling 500 ms ───────────────────────────────────────────────────────
+    // ── Polling 500 ms — fiable, universel, latence imperceptible ────────────
     let pollActive = false;
 
     async function pollState() {
@@ -645,10 +615,10 @@
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
         setOnair(!!data.onair);
-        onairStartedAtMs    = data.startedAt ? Date.parse(data.startedAt) : null;
         apiLamp.className   = "lamp ok";
         apiText.textContent = "API: OK";
       } catch {
+        // On garde l'état affiché — pas de flash vert intempestif
         apiLamp.className   = "lamp bad";
         apiText.textContent = "API: KO";
       } finally {
@@ -660,30 +630,19 @@
 
     function fitToScreen(){
       page.style.setProperty("--scale", 1);
-      page.style.setProperty("--base-w", "1920px");
-      const h0 = page.offsetHeight;
-      const s0 = window.innerHeight / h0;
-      const baseW = Math.round(window.innerWidth / s0);
-      page.style.setProperty("--base-w", baseW + "px");
-      const h1 = page.offsetHeight;
-      const s1 = window.innerHeight / h1;
-      page.style.setProperty("--scale", s1.toFixed(3));
+      const w = page.offsetWidth;
+      const h = page.offsetHeight;
+      const scale = Math.min(window.innerWidth / w, window.innerHeight / h);
+      page.style.setProperty("--scale", scale.toFixed(3));
     }
 
     updateClocks();
     setInterval(updateClocks, 1000);
-    updateTimer();
-    setInterval(updateTimer, 1000);
 
     pollState();
 
     fitToScreen();
-
-    let resizeTimeout;
-    window.addEventListener("resize", () => {
-      if(resizeTimeout) cancelAnimationFrame(resizeTimeout);
-      resizeTimeout = requestAnimationFrame(fitToScreen);
-    });
+    window.addEventListener("resize", fitToScreen);
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") pollState();

@@ -18,7 +18,7 @@ function ensureStateFile() {
 
 function writeState(onair) {
   const payload = JSON.stringify(
-    { onair: !!onair, updatedAt: new Date().toISOString() },
+    { onair: !!onair, startedAt: onair ? new Date().toISOString() : null, updatedAt: new Date().toISOString() },
     null,
     2
   );

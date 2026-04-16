@@ -1,0 +1,8 @@
+{
+  "name": "regee-onair",
+  "version": "1.0.0",
+  "description": "ON-AIR status API  Vercel serverless + Upstash Redis",
+  "engines": {
+    "node": ">=20"
+  }
+}
