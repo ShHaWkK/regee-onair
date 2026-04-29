@@ -146,6 +146,7 @@
     }
 
     .onDot{
+      display:none;
       width: 16px; height: 16px;
       border-radius: 4px;
       background: #ffffff;
@@ -327,8 +328,7 @@
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(4, auto);
-      justify-content: center;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 22px;
     }
 
@@ -340,7 +340,7 @@
         linear-gradient(180deg, rgba(24,49,86,.20), rgba(24,49,86,.08));
       padding: 18px 18px 16px;
       overflow:hidden;
-      width: 420px;
+      width: 100%;
     }
 
     .clockCard::before{
@@ -443,11 +443,10 @@
     .lamp.bad{background:#ef4444; box-shadow: 0 0 0 1px rgba(239,68,68,.35), 0 0 16px rgba(239,68,68,.35)}
 
     @media (max-width: 1280px){
-      .grid{ grid-template-columns: repeat(2, auto); justify-content:center; }
       .left, .right{ min-width: 220px; }
     }
     @media (max-width: 680px){
-      .grid{ grid-template-columns: auto; justify-content:center; }
+      .grid{ grid-template-columns: 1fr; }
       body.onair{ box-shadow: inset 0 0 0 7px rgba(255,45,45,.95); }
     }
   </style>
@@ -483,53 +482,17 @@
 
       <div class="right">
         <div class="brandText" id="clientLabel">Client</div>
-        <img class="logo" src="logo-client.png" alt="Logo client" onerror="this.style.display='none'">
+        <img class="logo" src="logo-client.png" alt="Logo client" onerror="if(this.dataset.fallback!=='1'){this.dataset.fallback='1';this.src='logo-bsrq.png';}else{this.style.display='none';}">
       </div>
     </div>
 
     <section class="primaryPanel">
       <div class="primaryTime" id="primaryTime">--:--:--</div>
-      <div class="primaryMeta">Europe/Paris</div>
+      <div class="primaryMeta" id="primaryMeta">Europe/Paris</div>
     </section>
 
     <section class="clocks">
-      <div class="grid">
-        <div class="clockCard" data-tz="America/Cayenne">
-          <div class="city">Kourou</div>
-          <div class="time" data-time>--:--:--</div>
-          <div class="meta">
-            <span>America/Cayenne</span>
-            <span data-date>--/--/----</span>
-          </div>
-        </div>
-
-        <div class="clockCard" data-tz="America/New_York">
-          <div class="city">Cape Canaveral (ET)</div>
-          <div class="time" data-time>--:--:--</div>
-          <div class="meta">
-            <span>America/New_York</span>
-            <span data-date>--/--/----</span>
-          </div>
-        </div>
-
-        <div class="clockCard" data-tz="UTC">
-          <div class="city">UTC</div>
-          <div class="time" data-time>--:--:--</div>
-          <div class="meta">
-            <span>UTC</span>
-            <span data-date>--/--/----</span>
-          </div>
-        </div>
-
-        <div class="clockCard" data-tz="Europe/Paris">
-          <div class="city">Paris</div>
-          <div class="time" data-time>--:--:--</div>
-          <div class="meta">
-            <span>Europe/Paris</span>
-            <span data-date>--/--/----</span>
-          </div>
-        </div>
-      </div>
+      <div class="grid" id="clockGrid"></div>
     </section>
 
     <div class="footer">
@@ -543,8 +506,20 @@
   </div>
 
   <script>
-    // V1 hardcodée (modifs à la main si besoin)
-    const SHOW_NAME = "ESA - CREW12";
+    const DEFAULT_SECONDARY_CLOCKS = Object.freeze([
+      Object.freeze({ label: "Kourou", timeZone: "America/Cayenne" }),
+      Object.freeze({ label: "Cape Canaveral (ET)", timeZone: "America/New_York" }),
+      Object.freeze({ label: "UTC", timeZone: "UTC" }),
+      Object.freeze({ label: "Paris", timeZone: "Europe/Paris" }),
+    ]);
+
+    const DEFAULT_CONFIG = Object.freeze({
+      showTitle: "ESA - CREW12",
+      primaryTimeZone: "Europe/Paris",
+      primaryTimeZoneLabel: "Europe/Paris",
+      secondaryClocks: DEFAULT_SECONDARY_CLOCKS,
+    });
+
     const CLIENT_LABEL = "Client";
 
     const $ = (id) => document.getElementById(id);
@@ -553,10 +528,16 @@
     const apiText       = $("apiText");
     const fullTimeEl    = $("fullTime");
     const primaryTimeEl = $("primaryTime");
-    const clockCards    = Array.from(document.querySelectorAll("[data-tz]"));
+    const primaryMetaEl = $("primaryMeta");
+    const showNameEl    = $("showName");
+    const clientLabelEl = $("clientLabel");
+    const clockGridEl   = $("clockGrid");
 
-    $("showName").textContent    = SHOW_NAME;
-    $("clientLabel").textContent = CLIENT_LABEL;
+    let currentConfig = { ...DEFAULT_CONFIG };
+    let clockCards = [];
+    let configPollActive = false;
+
+    clientLabelEl.textContent = CLIENT_LABEL;
 
     function setOnair(isOn){
       document.body.classList.toggle("onair", !!isOn);
@@ -565,7 +546,116 @@
     //  Formatters cachés (évite les re-créations coûteuses chaque seconde) 
     const timeFormatters = {};
     const dateFormatters = {};
-    let parisFullFormatter = null;
+    const fullFormatters = {};
+
+    function isValidTimeZone(tz){
+      if(!tz) return false;
+      try{
+        new Intl.DateTimeFormat("fr-FR", { timeZone: tz });
+        return true;
+      }catch{
+        return false;
+      }
+    }
+
+    function escapeHtml(value){
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;",
+      })[char]);
+    }
+
+    function cloneSecondaryClocks(clocks = DEFAULT_SECONDARY_CLOCKS){
+      return clocks.map((clock) => ({ ...clock }));
+    }
+
+    function normalizeClockItem(clock){
+      const requestedTimeZone = typeof clock?.timeZone === "string"
+        ? clock.timeZone.trim()
+        : typeof clock?.timezone === "string"
+          ? clock.timezone.trim()
+          : typeof clock?.tz === "string"
+            ? clock.tz.trim()
+            : "";
+
+      if(!isValidTimeZone(requestedTimeZone)) return null;
+
+      const label = typeof clock?.label === "string" && clock.label.trim()
+        ? clock.label.trim()
+        : typeof clock?.name === "string" && clock.name.trim()
+          ? clock.name.trim()
+          : typeof clock?.city === "string" && clock.city.trim()
+            ? clock.city.trim()
+            : requestedTimeZone;
+
+      return { label, timeZone: requestedTimeZone };
+    }
+
+    function normalizeSecondaryClocks(clocks){
+      if(!Array.isArray(clocks)) return cloneSecondaryClocks();
+
+      const next = clocks
+        .map((clock) => normalizeClockItem(clock))
+        .filter(Boolean);
+
+      return next.length ? next : cloneSecondaryClocks();
+    }
+
+    function normalizeConfig(config){
+      const next = { ...DEFAULT_CONFIG };
+
+      if(typeof config?.showTitle === "string" && config.showTitle.trim()){
+        next.showTitle = config.showTitle.trim();
+      }
+
+      const requestedTimeZone = typeof config?.primaryTimeZone === "string"
+        ? config.primaryTimeZone.trim()
+        : "";
+
+      if(isValidTimeZone(requestedTimeZone)){
+        next.primaryTimeZone = requestedTimeZone;
+      }
+
+      if(typeof config?.primaryTimeZoneLabel === "string" && config.primaryTimeZoneLabel.trim()){
+        next.primaryTimeZoneLabel = config.primaryTimeZoneLabel.trim();
+      }else{
+        next.primaryTimeZoneLabel = next.primaryTimeZone;
+      }
+
+      next.secondaryClocks = normalizeSecondaryClocks(
+        config?.secondaryClocks || config?.clocks
+      );
+
+      return next;
+    }
+
+    function renderClockCards(){
+      clockGridEl.innerHTML = currentConfig.secondaryClocks.map((clock) => `
+        <div class="clockCard" data-tz="${escapeHtml(clock.timeZone)}">
+          <div class="city">${escapeHtml(clock.label)}</div>
+          <div class="time" data-time>--:--:--</div>
+          <div class="meta">
+            <span>${escapeHtml(clock.timeZone)}</span>
+            <span data-date>--/--/----</span>
+          </div>
+        </div>
+      `).join("");
+
+      clockCards = Array.from(clockGridEl.querySelectorAll("[data-tz]"));
+    }
+
+    function applyConfig(config){
+      currentConfig = normalizeConfig(config);
+      showNameEl.textContent = currentConfig.showTitle;
+      primaryMetaEl.textContent = `${currentConfig.primaryTimeZoneLabel} (${currentConfig.primaryTimeZone})`;
+      document.title = `${currentConfig.showTitle} - Regie ON-AIR`;
+      renderClockCards();
+      updateClocks();
+      requestAnimationFrame(fitToScreen);
+    }
 
     function getFormatter(tz, type){
       if(type === "time"){
@@ -585,6 +675,16 @@
       return dateFormatters[tz];
     }
 
+    function getFullFormatter(tz){
+      if(!fullFormatters[tz]){
+        fullFormatters[tz] = new Intl.DateTimeFormat("fr-FR", {
+          timeZone: tz, weekday:"long", year:"numeric", month:"long",
+          day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false
+        });
+      }
+      return fullFormatters[tz];
+    }
+
     function updateClocks(){
       const now = new Date();
       clockCards.forEach(card => {
@@ -592,14 +692,8 @@
         card.querySelector("[data-time]").textContent = getFormatter(tz,"time").format(now);
         card.querySelector("[data-date]").textContent = getFormatter(tz,"date").format(now);
       });
-      if(!parisFullFormatter){
-        parisFullFormatter = new Intl.DateTimeFormat("fr-FR", {
-          timeZone:"Europe/Paris", weekday:"long", year:"numeric", month:"long",
-          day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false
-        });
-      }
-      fullTimeEl.textContent    = `Heure complète (Paris) : ${parisFullFormatter.format(now)}`;
-      primaryTimeEl.textContent = getFormatter("Europe/Paris","time").format(now);
+      fullTimeEl.textContent = `Heure complète (${currentConfig.primaryTimeZoneLabel}) : ${getFullFormatter(currentConfig.primaryTimeZone).format(now)}`;
+      primaryTimeEl.textContent = getFormatter(currentConfig.primaryTimeZone,"time").format(now);
     }
 
     // ── Polling 500 ms — fiable, universel, latence imperceptible ────────────
@@ -628,6 +722,26 @@
       }
     }
 
+    async function refreshConfig() {
+      if (configPollActive) return;
+      configPollActive = true;
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 4000);
+
+      try {
+        const res = await fetch("/api/config", { cache: "no-store", signal: ctrl.signal });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const config = await res.json();
+        applyConfig(config);
+      } catch {
+        applyConfig(currentConfig);
+      } finally {
+        clearTimeout(timeout);
+        configPollActive = false;
+        setTimeout(refreshConfig, 5000);
+      }
+    }
+
     function fitToScreen(){
       page.style.setProperty("--scale", 1);
       const w = page.offsetWidth;
@@ -636,10 +750,12 @@
       page.style.setProperty("--scale", scale.toFixed(3));
     }
 
+    applyConfig(DEFAULT_CONFIG);
     updateClocks();
     setInterval(updateClocks, 1000);
 
     pollState();
+    refreshConfig();
 
     fitToScreen();
     window.addEventListener("resize", fitToScreen);

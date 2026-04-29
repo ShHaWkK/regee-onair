@@ -1,0 +1,16 @@
+[Unit]
+Description=OnAirKiosk
+After=graphical.target network-online.target onair-docker.service
+Wants=onair-docker.service
+
+[Service]
+User=companion
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/companion/.Xauthority
+Type=simple
+ExecStart=/home/companion/regee-onair/onair-regie/kiosk.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

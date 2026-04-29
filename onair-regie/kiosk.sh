@@ -1,29 +1,31 @@
 #!/bin/bash
-# Script de démarrage mode kiosque pour OnAir Regie
-
-# Désactiver l'économiseur d'écran et la mise en veille
-xset s off
-xset s noblank
-xset -dpms
-
-# Masquer le curseur de la souris après 0.5s d'inactivité
-unclutter -idle 0.5 -root &
-
-# Attendre que le serveur soit prêt
-sleep 3
-
-# Lancer Chromium en mode kiosk (SANS demande de mot de passe keyring)
-chromium-browser \
+set -euo pipefail
+URL="http://127.0.0.1:8081/"
+for i in $(seq 1 60); do
+  if wget -q --spider "$URL"; then
+    break
+  fi
+  sleep 1
+done
+CHROME_BIN="chromium-browser"
+if ! command -v "$CHROME_BIN" >/dev/null 2>&1; then
+  CHROME_BIN="chromium"
+fi
+if ! command -v "$CHROME_BIN" >/dev/null 2>&1; then
+  CHROME_BIN="google-chrome"
+fi
+"$CHROME_BIN" \
   --kiosk \
   --noerrdialogs \
   --disable-infobars \
   --disable-session-crashed-bubble \
   --disable-restore-session-state \
-  --no-first-run \
   --start-fullscreen \
-  --autoplay-policy=no-user-gesture-required \
+  --no-first-run \
+  --no-default-browser-check \
+  --disable-features=TranslateUI \
+  --disable-translate \
+  --lang=fr \
+  --accept-languages=fr-FR \
   --password-store=basic \
-  --disable-features=LockProfileCookieDatabase \
-  --disable-background-networking \
-  --disable-sync \
-  http://localhost:8081/
+  "$URL"

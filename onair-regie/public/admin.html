@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Regie ON-AIR</title>
+  <style>
+    :root{
+      --bg:#0a1420;
+      --bg-soft:#0e1b2b;
+      --panel:#101d2f;
+      --panel-2:#15253b;
+      --panel-3:#1a2c45;
+      --line:rgba(203,221,246,.14);
+      --line-strong:rgba(203,221,246,.24);
+      --text:#edf4ff;
+      --muted:#9db0cd;
+      --accent:#8ec2ff;
+      --accent-strong:#5ca2ff;
+      --good:#33c46b;
+      --bad:#ef5b5b;
+      --warn:#e6a339;
+      --shadow:0 22px 50px rgba(0,0,0,.34);
+      --radius:16px;
+      --mono:"Consolas","Courier New",monospace;
+      --sans:"Aptos","Segoe UI","Helvetica Neue",Arial,sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
+
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:var(--sans);
+      background:
+        radial-gradient(1000px 520px at 12% -8%, rgba(24,49,86,.28), transparent 58%),
+        linear-gradient(180deg, #0a1420, #0d1726 42%, #0c1827 100%);
+      position:relative;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background-image:
+        linear-gradient(rgba(142,194,255,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(142,194,255,.055) 1px, transparent 1px);
+      background-size:24px 24px;
+      opacity:.14;
+      pointer-events:none;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.1));
+    }
+
+    a{ color:inherit; text-decoration:none; }
+
+    .appShell{
+      width:min(1380px, calc(100vw - 28px));
+      margin:18px auto 28px;
+      display:grid;
+      gap:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+      padding:16px 18px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(21,37,59,.96), rgba(14,27,43,.96));
+      box-shadow:var(--shadow);
+    }
+
+    .brandBlock{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:min(100%, 520px);
+    }
+
+    .brandBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:78px;
+      height:52px;
+      padding:10px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(8,15,24,.42);
+    }
+
+    .brandBadge img{
+      display:block;
+      height:28px;
+      width:auto;
+    }
+
+    .overline{
+      margin:0 0 4px;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(26px, 4vw, 34px);
+      line-height:1.1;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+
+    .subtitle{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+      max-width:70ch;
+    }
+
+    .topbarActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .workspace{
+      display:grid;
+      grid-template-columns:minmax(0, 1.1fr) minmax(320px, .64fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .stack{
+      display:grid;
+      gap:18px;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(21,37,59,.98), rgba(16,29,47,.98));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panelHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:18px 20px 14px;
+      border-bottom:1px solid rgba(203,221,246,.08);
+      background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+    }
+
+    .panelHeader h2{
+      margin:4px 0 0;
+      font-size:21px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+
+    .panelKicker{
+      margin:0;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+    }
+
+    .panelBody{
+      padding:18px 20px 20px;
+      display:grid;
+      gap:16px;
+    }
+
+    .panelHelp{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    form{
+      margin:0;
+      display:grid;
+      gap:18px;
+    }
+
+    .field{
+      display:grid;
+      gap:7px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:14px;
+    }
+
+    label{
+      color:#dfeafe;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .hint{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(8,15,24,.48);
+      color:var(--text);
+      padding:13px 14px;
+      font:inherit;
+      outline:none;
+      transition:border-color .14s ease, box-shadow .14s ease, background .14s ease;
+    }
+
+    input:focus{
+      border-color:rgba(142,194,255,.72);
+      box-shadow:0 0 0 3px rgba(92,162,255,.16);
+      background:rgba(10,19,31,.72);
+    }
+
+    .toolButton,
+    .primaryButton,
+    .secondaryButton,
+    .ghostButton,
+    .linkButton,
+    button{
+      appearance:none;
+      border:none;
+      font:inherit;
+      font-weight:700;
+      cursor:pointer;
+      transition:background .14s ease, border-color .14s ease, color .14s ease, transform .14s ease, opacity .14s ease;
+    }
+
+    .toolButton,
+    .secondaryButton,
+    .ghostButton,
+    .linkButton{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:42px;
+      padding:11px 14px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(255,255,255,.035);
+      color:var(--text);
+    }
+
+    .primaryButton{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:12px 18px;
+      border-radius:12px;
+      background:linear-gradient(180deg, #8cc0ff, #5d9fff);
+      color:#08131f;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28);
+    }
+
+    .ghostButton{
+      min-height:36px;
+      padding:8px 11px;
+      font-size:12px;
+      letter-spacing:.04em;
+    }
+
+    .toolButton:hover,
+    .secondaryButton:hover,
+    .ghostButton:hover,
+    .linkButton:hover,
+    .primaryButton:hover{
+      transform:translateY(-1px);
+    }
+
+    button:disabled,
+    .ghostButton:disabled{
+      opacity:.42;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .clockEditorList,
+    .previewClockGrid{
+      display:grid;
+      gap:12px;
+    }
+
+    .clockEditorCard{
+      border:1px solid rgba(203,221,246,.1);
+      border-radius:14px;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)), rgba(10,18,29,.38);
+      overflow:hidden;
+    }
+
+    .clockEditorHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(203,221,246,.08);
+      background:rgba(255,255,255,.018);
+    }
+
+    .clockEditorIndex{
+      margin:0;
+      color:#dfeafe;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+
+    .clockEditorMeta{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      font-family:var(--mono);
+      letter-spacing:.02em;
+      word-break:break-word;
+    }
+
+    .clockEditorActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .clockEditorBody{
+      padding:15px 16px 16px;
+      display:grid;
+      grid-template-columns:minmax(0, .9fr) minmax(0, 1.1fr);
+      gap:14px;
+    }
+
+    .authGrid{
+      display:grid;
+      gap:14px;
+    }
+
+    .remember{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .remember input{
+      width:16px;
+      height:16px;
+      margin:0;
+      accent-color:var(--accent-strong);
+    }
+
+    .footerBar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      padding:16px 18px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(21,37,59,.98), rgba(16,29,47,.98));
+      box-shadow:var(--shadow);
+    }
+
+    .footerActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .status{
+      min-height:20px;
+      color:var(--muted);
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .status.pending{ color:var(--warn); }
+    .status.ok{ color:var(--good); }
+    .status.error{ color:var(--bad); }
+
+    .sideStack{
+      display:grid;
+      gap:18px;
+      position:sticky;
+      top:18px;
+    }
+
+    .summaryGrid{
+      display:grid;
+      gap:10px;
+    }
+
+    .summaryTitle{
+      font-size:28px;
+      line-height:1.1;
+      font-weight:800;
+      letter-spacing:-.03em;
+      text-transform:uppercase;
+    }
+
+    .summaryZone{
+      color:#d6e6ff;
+      font-size:14px;
+      font-family:var(--mono);
+      word-break:break-word;
+    }
+
+    .summaryTime{
+      font-family:var(--mono);
+      font-size:clamp(38px, 5vw, 56px);
+      font-weight:900;
+      letter-spacing:.03em;
+      line-height:1;
+      color:#f4f7fd;
+    }
+
+    .summaryMeta{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    .liveFlag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .liveFlag::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--good);
+      box-shadow:0 0 0 4px rgba(51,196,107,.12);
+    }
+
+    .previewClockGrid{
+      grid-template-columns:repeat(auto-fit, minmax(168px, 1fr));
+    }
+
+    .previewClockCard{
+      border:1px solid rgba(203,221,246,.1);
+      border-radius:14px;
+      padding:14px;
+      background:rgba(8,15,24,.34);
+      display:grid;
+      gap:8px;
+    }
+
+    .previewClockName{
+      color:#dbe8fb;
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      line-height:1.4;
+    }
+
+    .previewClockTime{
+      font-family:var(--mono);
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:.04em;
+    }
+
+    .previewClockZone{
+      color:var(--muted);
+      font-size:12px;
+      font-family:var(--mono);
+      word-break:break-word;
+    }
+
+    .noteList{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      display:grid;
+      gap:10px;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    code{
+      font-family:var(--mono);
+      color:#dce9ff;
+      font-size:.95em;
+    }
+
+    @media (max-width: 1040px){
+      .workspace{ grid-template-columns:1fr; }
+      .sideStack{ position:static; }
+    }
+
+    @media (max-width: 760px){
+      .appShell{ width:min(100vw - 20px, 1380px); }
+      .row,
+      .clockEditorBody{ grid-template-columns:1fr; }
+      .footerBar{ align-items:flex-start; }
+      .topbar{ padding:14px; }
+      .panelHeader,
+      .panelBody{ padding-left:16px; padding-right:16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="appShell">
+    <header class="topbar">
+      <div class="brandBlock">
+        <span class="brandBadge">
+          <img src="logo-bsrq.png" alt="Logo BSRQ" onerror="this.style.display='none'">
+        </span>
+        <div>
+          <p class="overline">BSRQ.MEDIA / Regie</p>
+          <h1>Console admin ON-AIR</h1>
+          <p class="subtitle">Edition du titre, du fuseau principal et des horloges affichees a l'ecran.</p>
+        </div>
+      </div>
+      <div class="topbarActions">
+        <a class="toolButton" href="/">Ouvrir l'affichage</a>
+        <button class="toolButton" type="button" id="reloadButton">Recharger la config</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="stack">
+        <form id="configForm">
+          <section class="panel">
+            <div class="panelHeader">
+              <div>
+                <p class="panelKicker">Programme</p>
+                <h2>Signal principal</h2>
+              </div>
+            </div>
+            <div class="panelBody">
+              <div class="field">
+                <label for="showTitle">Titre de l'emission</label>
+                <input id="showTitle" name="showTitle" type="text" maxlength="120" required>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label for="primaryTimeZone">Fuseau horaire principal</label>
+                  <input id="primaryTimeZone" name="primaryTimeZone" type="text" placeholder="Europe/Paris" required>
+                  <p class="hint">Identifiant IANA. Exemples: <code>Europe/Paris</code>, <code>UTC</code>, <code>America/New_York</code>.</p>
+                </div>
+
+                <div class="field">
+                  <label for="primaryTimeZoneLabel">Nom affiche du fuseau principal</label>
+                  <input id="primaryTimeZoneLabel" name="primaryTimeZoneLabel" type="text" maxlength="120" placeholder="Paris">
+                  <p class="hint">Libelle visible sous l'horloge principale et dans le pied de page.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="secondaryClocksHeading">
+            <div class="panelHeader">
+              <div>
+                <p class="panelKicker">Horloges</p>
+                <h2 id="secondaryClocksHeading">Horloges secondaires</h2>
+              </div>
+              <button class="secondaryButton" type="button" id="addClockButton">Ajouter une horloge</button>
+            </div>
+            <div class="panelBody">
+              <p class="panelHelp">L'ordre de cette liste correspond a l'ordre d'affichage de gauche a droite sur l'ecran principal.</p>
+              <div class="clockEditorList" id="secondaryClockList"></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panelHeader">
+              <div>
+                <p class="panelKicker">Securite</p>
+                <h2>Validation</h2>
+              </div>
+            </div>
+            <div class="panelBody authGrid">
+              <div class="field">
+                <label for="token">Token admin</label>
+                <input id="token" name="token" type="password" placeholder="ONAIR_TOKEN">
+                <p class="hint">Utilise le meme token que les routes ON/OFF. Il est demande uniquement pour enregistrer.</p>
+              </div>
+
+              <label class="remember" for="rememberToken">
+                <input id="rememberToken" name="rememberToken" type="checkbox">
+                <span>Memoriser le token sur cet appareil</span>
+              </label>
+            </div>
+          </section>
+
+          <div class="footerBar">
+            <div class="status" id="status"></div>
+            <div class="footerActions">
+              <button class="secondaryButton" type="button" id="resetButton">Revenir aux valeurs chargees</button>
+              <button class="primaryButton" type="submit">Enregistrer</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <aside class="sideStack">
+        <section class="panel">
+          <div class="panelHeader">
+            <div>
+              <p class="panelKicker">Apercu</p>
+              <h2>Horloge principale</h2>
+            </div>
+            <span class="liveFlag">Maj auto</span>
+          </div>
+          <div class="panelBody summaryGrid">
+            <div class="summaryTitle" id="previewTitle">ESA - CREW12</div>
+            <div class="summaryZone" id="previewZone">Europe/Paris (Europe/Paris)</div>
+            <div class="summaryTime" id="previewTime">--:--:--</div>
+            <p class="summaryMeta" id="previewMeta">Entrez un fuseau horaire valide pour afficher l'heure ici.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panelHeader">
+            <div>
+              <p class="panelKicker">Apercu</p>
+              <h2>Horloges affichees</h2>
+            </div>
+          </div>
+          <div class="panelBody">
+            <div class="previewClockGrid" id="previewClockGrid"></div>
+          </div>
+        </section>
+
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const DEFAULT_SECONDARY_CLOCKS = Object.freeze([
+      Object.freeze({ label: "Kourou", timeZone: "America/Cayenne" }),
+      Object.freeze({ label: "Cape Canaveral (ET)", timeZone: "America/New_York" }),
+      Object.freeze({ label: "UTC", timeZone: "UTC" }),
+      Object.freeze({ label: "Paris", timeZone: "Europe/Paris" }),
+    ]);
+
+    const DEFAULT_CONFIG = Object.freeze({
+      showTitle: "ESA - CREW12",
+      primaryTimeZone: "Europe/Paris",
+      primaryTimeZoneLabel: "Europe/Paris",
+      secondaryClocks: DEFAULT_SECONDARY_CLOCKS,
+    });
+
+    const TOKEN_STORAGE_KEY = "onair_admin_token";
+    const MAX_SECONDARY_CLOCKS = 8;
+
+    const form = document.getElementById("configForm");
+    const showTitleInput = document.getElementById("showTitle");
+    const primaryTimeZoneInput = document.getElementById("primaryTimeZone");
+    const primaryTimeZoneLabelInput = document.getElementById("primaryTimeZoneLabel");
+    const tokenInput = document.getElementById("token");
+    const rememberTokenInput = document.getElementById("rememberToken");
+    const reloadButton = document.getElementById("reloadButton");
+    const resetButton = document.getElementById("resetButton");
+    const addClockButton = document.getElementById("addClockButton");
+    const secondaryClockListEl = document.getElementById("secondaryClockList");
+    const statusEl = document.getElementById("status");
+    const previewTitleEl = document.getElementById("previewTitle");
+    const previewZoneEl = document.getElementById("previewZone");
+    const previewTimeEl = document.getElementById("previewTime");
+    const previewMetaEl = document.getElementById("previewMeta");
+    const previewClockGridEl = document.getElementById("previewClockGrid");
+
+    let loadedConfig = normalizeConfig(DEFAULT_CONFIG);
+    let draftClocks = cloneSecondaryClocks(DEFAULT_SECONDARY_CLOCKS);
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[char]);
+    }
+
+    function setStatus(message, tone = "") {
+      statusEl.className = tone ? `status ${tone}` : "status";
+      statusEl.textContent = message;
+    }
+
+    function isValidTimeZone(timeZone) {
+      if (!timeZone) return false;
+      try {
+        new Intl.DateTimeFormat("fr-FR", { timeZone });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function cloneSecondaryClocks(clocks = DEFAULT_SECONDARY_CLOCKS) {
+      return clocks.map((clock) => ({ ...clock }));
+    }
+
+    function normalizeClockItem(clock) {
+      const requestedTimeZone = typeof clock?.timeZone === "string"
+        ? clock.timeZone.trim()
+        : typeof clock?.timezone === "string"
+          ? clock.timezone.trim()
+          : typeof clock?.tz === "string"
+            ? clock.tz.trim()
+            : "";
+
+      if (!isValidTimeZone(requestedTimeZone)) return null;
+
+      const label = typeof clock?.label === "string" && clock.label.trim()
+        ? clock.label.trim()
+        : typeof clock?.name === "string" && clock.name.trim()
+          ? clock.name.trim()
+          : typeof clock?.city === "string" && clock.city.trim()
+            ? clock.city.trim()
+            : requestedTimeZone;
+
+      return { label, timeZone: requestedTimeZone };
+    }
+
+    function normalizeConfig(config) {
+      const next = {
+        showTitle: DEFAULT_CONFIG.showTitle,
+        primaryTimeZone: DEFAULT_CONFIG.primaryTimeZone,
+        primaryTimeZoneLabel: DEFAULT_CONFIG.primaryTimeZoneLabel,
+        secondaryClocks: cloneSecondaryClocks(DEFAULT_SECONDARY_CLOCKS),
+      };
+
+      if (typeof config?.showTitle === "string" && config.showTitle.trim()) {
+        next.showTitle = config.showTitle.trim();
+      }
+
+      const requestedPrimaryTimeZone = typeof config?.primaryTimeZone === "string"
+        ? config.primaryTimeZone.trim()
+        : typeof config?.timeZone === "string"
+          ? config.timeZone.trim()
+          : "";
+
+      if (isValidTimeZone(requestedPrimaryTimeZone)) {
+        next.primaryTimeZone = requestedPrimaryTimeZone;
+      }
+
+      if (typeof config?.primaryTimeZoneLabel === "string" && config.primaryTimeZoneLabel.trim()) {
+        next.primaryTimeZoneLabel = config.primaryTimeZoneLabel.trim();
+      } else {
+        next.primaryTimeZoneLabel = next.primaryTimeZone;
+      }
+
+      if (Array.isArray(config?.secondaryClocks || config?.clocks)) {
+        const normalizedClocks = (config.secondaryClocks || config.clocks)
+          .map((clock) => normalizeClockItem(clock))
+          .filter(Boolean)
+          .slice(0, MAX_SECONDARY_CLOCKS);
+
+        if (normalizedClocks.length) {
+          next.secondaryClocks = normalizedClocks;
+        }
+      }
+
+      return next;
+    }
+
+    function formatClockTime(timeZone) {
+      return new Intl.DateTimeFormat("fr-FR", {
+        timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      }).format(new Date());
+    }
+
+    function renderClockEditors() {
+      secondaryClockListEl.innerHTML = draftClocks.map((clock, index) => `
+        <article class="clockEditorCard">
+          <div class="clockEditorHeader">
+            <div>
+              <p class="clockEditorIndex">Horloge ${String(index + 1).padStart(2, "0")}</p>
+              <p class="clockEditorMeta">${escapeHtml((clock.timeZone || "").trim() || "Fuseau non defini")}</p>
+            </div>
+            <div class="clockEditorActions">
+              <button class="ghostButton" type="button" data-clock-action="up" data-index="${index}" ${index === 0 ? "disabled" : ""}>Monter</button>
+              <button class="ghostButton" type="button" data-clock-action="down" data-index="${index}" ${index === draftClocks.length - 1 ? "disabled" : ""}>Descendre</button>
+              <button class="ghostButton" type="button" data-clock-action="remove" data-index="${index}" ${draftClocks.length <= 1 ? "disabled" : ""}>Supprimer</button>
+            </div>
+          </div>
+          <div class="clockEditorBody">
+            <div class="field">
+              <label for="clock-label-${index}">Nom affiche</label>
+              <input id="clock-label-${index}" type="text" data-clock-field="label" data-index="${index}" value="${escapeHtml(clock.label || "")}" placeholder="Paris">
+            </div>
+            <div class="field">
+              <label for="clock-timezone-${index}">Fuseau horaire</label>
+              <input id="clock-timezone-${index}" type="text" data-clock-field="timeZone" data-index="${index}" value="${escapeHtml(clock.timeZone || "")}" placeholder="Europe/Paris">
+            </div>
+          </div>
+        </article>
+      `).join("");
+
+      addClockButton.disabled = draftClocks.length >= MAX_SECONDARY_CLOCKS;
+    }
+
+    function renderPreviewClocks() {
+      previewClockGridEl.innerHTML = draftClocks.map((clock, index) => {
+        const timeZone = (clock.timeZone || "").trim();
+        const label = (clock.label || "").trim() || timeZone || `Horloge ${index + 1}`;
+
+        let displayTime = "--:--:--";
+        let meta = "Fuseau manquant";
+
+        if (timeZone) {
+          if (isValidTimeZone(timeZone)) {
+            displayTime = formatClockTime(timeZone);
+            meta = timeZone;
+          } else {
+            displayTime = "INVALIDE";
+            meta = "Fuseau invalide";
+          }
+        }
+
+        return `
+          <div class="previewClockCard">
+            <div class="previewClockName">${escapeHtml(label)}</div>
+            <div class="previewClockTime">${escapeHtml(displayTime)}</div>
+            <div class="previewClockZone">${escapeHtml(meta)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function getDraftConfig() {
+      const showTitle = showTitleInput.value.trim() || DEFAULT_CONFIG.showTitle;
+      const primaryTimeZone = primaryTimeZoneInput.value.trim();
+      const primaryTimeZoneLabel = primaryTimeZoneLabelInput.value.trim();
+
+      return {
+        showTitle,
+        primaryTimeZone,
+        primaryTimeZoneLabel: primaryTimeZoneLabel || primaryTimeZone || DEFAULT_CONFIG.primaryTimeZone,
+        secondaryClocks: draftClocks.map((clock) => ({
+          label: typeof clock.label === "string" ? clock.label.trim() : "",
+          timeZone: typeof clock.timeZone === "string" ? clock.timeZone.trim() : "",
+        })),
+      };
+    }
+
+    function populateForm(config) {
+      loadedConfig = normalizeConfig(config);
+      showTitleInput.value = loadedConfig.showTitle;
+      primaryTimeZoneInput.value = loadedConfig.primaryTimeZone;
+      primaryTimeZoneLabelInput.value = loadedConfig.primaryTimeZoneLabel;
+      draftClocks = cloneSecondaryClocks(loadedConfig.secondaryClocks);
+      renderClockEditors();
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const draft = getDraftConfig();
+      const timeZone = draft.primaryTimeZone || DEFAULT_CONFIG.primaryTimeZone;
+      const label = draft.primaryTimeZoneLabel || timeZone;
+
+      previewTitleEl.textContent = draft.showTitle;
+      previewZoneEl.textContent = `${label} (${timeZone})`;
+
+      if (!draft.primaryTimeZone.trim()) {
+        previewTimeEl.textContent = "--:--:--";
+        previewMetaEl.textContent = "Le champ fuseau horaire principal est requis.";
+      } else if (!isValidTimeZone(timeZone)) {
+        previewTimeEl.textContent = "INVALIDE";
+        previewMetaEl.textContent = "Ce fuseau horaire principal n'est pas reconnu. Utilisez un identifiant IANA valide.";
+      } else {
+        previewTimeEl.textContent = formatClockTime(timeZone);
+        previewMetaEl.textContent = "Apercu de l'heure principale avec les valeurs actuellement saisies.";
+      }
+
+      renderPreviewClocks();
+    }
+
+    function swapDraftClocks(a, b) {
+      const next = [...draftClocks];
+      [next[a], next[b]] = [next[b], next[a]];
+      draftClocks = next;
+      renderClockEditors();
+      updatePreview();
+    }
+
+    async function loadConfig() {
+      setStatus("Chargement de la configuration...", "pending");
+      try {
+        const res = await fetch("/api/config", { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const config = await res.json();
+        populateForm(config);
+        setStatus("Configuration chargee.", "ok");
+      } catch {
+        populateForm(DEFAULT_CONFIG);
+        setStatus("Impossible de charger la configuration. Valeurs par defaut affichees.", "error");
+      }
+    }
+
+    async function saveConfig(event) {
+      event.preventDefault();
+      const draft = getDraftConfig();
+
+      if (!draft.primaryTimeZone.trim()) {
+        setStatus("Le fuseau horaire principal est obligatoire.", "error");
+        primaryTimeZoneInput.focus();
+        return;
+      }
+
+      if (!isValidTimeZone(draft.primaryTimeZone)) {
+        setStatus("Le fuseau horaire principal n'est pas valide. Exemple: Europe/Paris.", "error");
+        primaryTimeZoneInput.focus();
+        return;
+      }
+
+      if (!draft.secondaryClocks.length) {
+        setStatus("Ajoutez au moins une horloge secondaire.", "error");
+        return;
+      }
+
+      const invalidClockIndex = draft.secondaryClocks.findIndex((clock) => !clock.timeZone || !isValidTimeZone(clock.timeZone));
+      if (invalidClockIndex !== -1) {
+        setStatus(`Le fuseau de l'horloge ${invalidClockIndex + 1} n'est pas valide.`, "error");
+        const invalidInput = secondaryClockListEl.querySelector(`[data-clock-field="timeZone"][data-index="${invalidClockIndex}"]`);
+        if (invalidInput) invalidInput.focus();
+        return;
+      }
+
+      const payload = {
+        showTitle: draft.showTitle,
+        primaryTimeZone: draft.primaryTimeZone,
+        primaryTimeZoneLabel: draft.primaryTimeZoneLabel,
+        secondaryClocks: draft.secondaryClocks.map((clock) => ({
+          label: clock.label || clock.timeZone,
+          timeZone: clock.timeZone,
+        })),
+      };
+
+      setStatus("Enregistrement en cours...", "pending");
+
+      try {
+        const token = tokenInput.value.trim();
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch("/api/config", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload),
+        });
+
+        if (res.status === 401) {
+          throw new Error("Token invalide ou manquant.");
+        }
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        populateForm(data.config || payload);
+
+        if (rememberTokenInput.checked && token) {
+          localStorage.setItem(TOKEN_STORAGE_KEY, token);
+        } else {
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+        }
+
+        setStatus("Configuration enregistree.", "ok");
+      } catch (err) {
+        setStatus(err.message || "Echec de l'enregistrement.", "error");
+      }
+    }
+
+    const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (savedToken) {
+      tokenInput.value = savedToken;
+      rememberTokenInput.checked = true;
+    }
+
+    form.addEventListener("submit", saveConfig);
+    reloadButton.addEventListener("click", loadConfig);
+    resetButton.addEventListener("click", () => {
+      populateForm(loadedConfig);
+      setStatus("Valeurs rechargees depuis la derniere configuration connue.");
+    });
+    addClockButton.addEventListener("click", () => {
+      if (draftClocks.length >= MAX_SECONDARY_CLOCKS) return;
+      draftClocks = [...draftClocks, { label: `Horloge ${draftClocks.length + 1}`, timeZone: "UTC" }];
+      renderClockEditors();
+      updatePreview();
+    });
+
+    secondaryClockListEl.addEventListener("input", (event) => {
+      const input = event.target.closest("[data-clock-field]");
+      if (!input) return;
+
+      const index = Number(input.dataset.index);
+      const field = input.dataset.clockField;
+      if (!Number.isInteger(index) || !draftClocks[index]) return;
+
+      draftClocks[index] = {
+        ...draftClocks[index],
+        [field]: input.value,
+      };
+      updatePreview();
+    });
+
+    secondaryClockListEl.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-clock-action]");
+      if (!button) return;
+
+      const index = Number(button.dataset.index);
+      if (!Number.isInteger(index) || !draftClocks[index]) return;
+
+      if (button.dataset.clockAction === "up" && index > 0) {
+        swapDraftClocks(index, index - 1);
+      }
+
+      if (button.dataset.clockAction === "down" && index < draftClocks.length - 1) {
+        swapDraftClocks(index, index + 1);
+      }
+
+      if (button.dataset.clockAction === "remove" && draftClocks.length > 1) {
+        draftClocks = draftClocks.filter((_, clockIndex) => clockIndex !== index);
+        renderClockEditors();
+        updatePreview();
+      }
+    });
+
+    [showTitleInput, primaryTimeZoneInput, primaryTimeZoneLabelInput].forEach((input) => {
+      input.addEventListener("input", updatePreview);
+    });
+
+    updatePreview();
+    loadConfig();
+    setInterval(updatePreview, 1000);
+  </script>
+</body>
+</html>
